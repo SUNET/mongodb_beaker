@@ -198,6 +198,7 @@ except ImportError:
 
 try:
     from pymongo.connection import Connection
+    from pymongo.uri_parser import parse_uri
     import bson
     import bson.errors
 except ImportError:
@@ -228,7 +229,13 @@ class MongoDBNamespaceManager(NamespaceManager):
             self._sparse = True
 
         # Temporarily uses a local copy of the functions until pymongo upgrades to new parser code
-        (host_list, database, username, password, collection, options) = _parse_uri(url)
+        url_components = parse_uri(url)
+        host_list = url_components['nodelist']
+        username = url_components['username']
+        password = url_components['password']
+        collection = url_components['collection']
+        database = url_components['database']
+        options = url_components['options']
 
         if database and host_list:
             data_key = "mongodb:%s" % (database)
@@ -248,7 +255,7 @@ class MongoDBNamespaceManager(NamespaceManager):
             for x in host_list:
                 host_uri += '%s:%s' % x
             log.info("Host URI: %s" % host_uri)
-            conn = Connection(host_uri, slave_okay=options.get('slaveok', False))
+            conn = Connection(url, slave_okay=options.get('slaveok', False))
 
             db = conn[database]
 
@@ -443,64 +450,6 @@ def _str_to_node(string, default_port=27017):
         port = default_port
     return (host, port)
 
-
-def _parse_uri(uri, default_port=27017):
-    """MongoDB URI parser.
-    """
-
-    if uri.startswith("mongodb://"):
-        uri = uri[len("mongodb://"):]
-    elif "://" in uri:
-        raise InvalidURI("Invalid uri scheme: %s" % _partition(uri, "://")[0])
-
-    (hosts, namespace) = _partition(uri, "/")
-
-    raw_options = None
-    if namespace:
-        (namespace, raw_options) = _partition(namespace, "?")
-        if '.' not in namespace and '#' not in namespace:
-            db = namespace
-            collection = None
-        else:
-            if '#' in namespace:
-                (db, collection) = namespace.split("#", 1)
-            else:
-                (db, collection) = namespace.split(".", 1)
-    else:
-        db = None
-        collection = None
-
-    username = None
-    password = None
-    if "@" in hosts:
-        (auth, hosts) = _partition(hosts, "@")
-
-        if ":" not in auth:
-            raise InvalidURI("auth must be specified as "
-                             "'username:password@'")
-        (username, password) = _partition(auth, ":")
-
-    host_list = []
-    for host in hosts.split(","):
-        if not host:
-            raise InvalidURI("empty host (or extra comma in host list)")
-        host_list.append(_str_to_node(host, default_port))
-
-    options = {}
-    if raw_options:
-        and_idx = raw_options.find("&")
-        semi_idx = raw_options.find(";")
-        if and_idx >= 0 and semi_idx >= 0:
-            raise InvalidURI("Cannot mix & and ; for option separators.")
-        elif and_idx >= 0:
-            options = dict([kv.split("=") for kv in raw_options.split("&")])
-        elif semi_idx >= 0:
-            options = dict([kv.split("=") for kv in raw_options.split(";")])
-        elif raw_options.find("="):
-            options = dict([raw_options.split("=")])
-
-
-    return (host_list, db, username, password, collection, options)
 
 def _depickle(value):
     try:
