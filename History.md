@@ -1,3 +1,6 @@
+0.5.1 / 2013-01-29
+==================
+  * Add MANIFEST to get long_description working from a sdist.
 
 0.5.1 / 2013-01-29
 ==================
