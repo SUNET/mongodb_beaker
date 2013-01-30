@@ -1,4 +1,8 @@
-0.5.1 / 2013-01-29
+0.5.3 / 2013-01-30
+==================
+  * Fix check for lockdir when attribute is missing.
+
+0.5.2 / 2013-01-29
 ==================
   * Add MANIFEST to get long_description working from a sdist.
 

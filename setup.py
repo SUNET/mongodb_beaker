@@ -18,7 +18,7 @@ README = open(os.path.join(here, 'README.rst')).read()
 
 setup(
     name='mongodb_beaker',
-    version='0.5.2',
+    version='0.5.3',
     description=('Beaker backend to write sessions and caches to a '
                    'MongoDB schemaless database.'),
     long_description='\n' + README,
@@ -51,6 +51,6 @@ setup(
     requires=['pymongo', 'beaker'],
     install_requires=[
         'pymongo>=1.9',
-        'beaker>=1.5'
+        'Beaker>=1.5'
     ]
 )
