@@ -197,7 +197,7 @@ except ImportError:
     import pickle
 
 try:
-    from pymongo.connection import Connection
+    from pymongo import MongoClient as Connection
     import bson
     import bson.errors
 except ImportError:
