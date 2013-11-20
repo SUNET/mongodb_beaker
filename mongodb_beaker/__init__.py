@@ -209,7 +209,7 @@ except ImportError:
     import pickle
 
 try:
-    from pymongo.connection import Connection
+    from pymongo import MongoClient as Connection
     from pymongo.uri_parser import parse_uri
     import bson
     import bson.errors

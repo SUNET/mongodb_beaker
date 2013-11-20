@@ -50,7 +50,7 @@ setup(
     """,
     requires=['pymongo', 'beaker'],
     install_requires=[
-        'pymongo>=1.9',
+        'pymongo>=2.4',
         'Beaker>=1.5'
     ]
 )
