@@ -73,7 +73,8 @@ options and details in the Beaker configuration docs [1]_.
 .. [1] Beaker's configuration documentation -
         http://beaker.groovie.org/configuration.htm
 
-I have a few cache regions in one of my applications, some of which are memcache and some are on mongodb.  The region config looks like this::
+I have a few cache regions in one of my applications, some of which are
+memcache and some are on mongodb.  The region config looks like this::
 
     >>> # new style cache settings
     ... beaker.cache.regions = comic_archives, navigation
@@ -83,7 +84,7 @@ I have a few cache regions in one of my applications, some of which are memcache
     ... beaker.cache.navigation.type = mongodb
     ... beaker.cache.navigation.url = mongodb://localhost:27017/beaker.navigation
     ... beaker.cache.navigation.expire = 86400
- 
+
 The Beaker docs[1] contain detailed information on configuring regions.  The
 item we're interested in here is the **beaker.cache.navigation** keys.  Each
 beaker cache definition needs a *type* field, which defines which backend to
@@ -94,21 +95,23 @@ it will tell you that mongodb is an invalid backend.
 Expiration is standard beaker syntax, although not supported at the moment in
 this backend.
 
-Finally, you need to define a URL to connect to MongoDB.  This follows the standardized
-MongoDB URI Format[3]_. Currently the only options supported is 'slaveOK'.
-For backwards compatibility with old versions of mongodb_beaker, separating
-database and collection with a '#' instead of '.' is supported, but deprecated.
-The syntax is mongodb://<hostname>[:port]/<database>.<collection>
+Finally, you need to define a URL to connect to MongoDB.  This follows the
+standardized MongoDB URI Format[3]_. Currently the only options supported is
+'slaveOK'.  For backwards compatibility with old versions of mongodb_beaker,
+separating database and collection with a '#' instead of '.' is supported, but
+deprecated.  The syntax is mongodb://<hostname>[:port]/<database>.<collection>
 
-You must define a collection for MongoDB to store data in, in addition to a database.
+You must define a collection for MongoDB to store data in, in addition to a
+database.
 
-If you want to use MongoDB's optional authentication support, that is also supported.  Simply define your URL as such::
+If you want to use MongoDB's optional authentication support, that is also
+supported.  Simply define your URL as such::
 
     >>> beaker.cache.navigation.url = mongodb://bwmcadams@passW0Rd?@localhost:27017/beaker.navigation
 
 The mongodb_beaker backend will attempt to authenticate with the username and
-password.  You must configure MongoDB's optional authentication support[2]_ for
-this to work (By default MongoDB doesn't use authentication).
+password.  You must configure MongoDB's optional authentication support[2]_
+for this to work (By default MongoDB doesn't use authentication).
 
 .. [2] MongoDB Authentication Documentation: http://www.mongodb.org/display/DOCS/Security+and+Authentication
 .. [3] MongoDB URI Format: http://www.mongodb.org/display/DOCS/Connections
@@ -117,7 +120,8 @@ this to work (By default MongoDB doesn't use authentication).
 Reading from Secondaries (SlaveOK)
 ==================================
 
-If you'd like to enable reading from secondaries (SlaveOK), you can add that to your URL::
+If you'd like to enable reading from secondaries (SlaveOK), you can add that
+to your URL::
 
     >>> beaker.cache.navigation.url = mongodb://bwmcadams@passW0Rd?@localhost:27017/beaker.navigation?slaveok=true
 
@@ -127,14 +131,14 @@ Using Beaker Sessions and disabling pickling
 
 .. _disable:
 
-If you want to save some CPU cycles and can guarantee that what you're
-passing in is either "mongo-safe" and doesn't need pickling, or you know
-it's already pickled (such as while using beaker sessions), you can set an
-extra beaker config flag of skip_pickle=True.  ``.. admonition:: To make that
-perfectly clear, Beaker sessions are ALREADY PASSED IN pickled, so you want to
-configure it to skip_pickle.`` It shouldn't hurt anything to double-pickle,
-but you will certainly waste precious CPU cycles.  And wasting CPU cycles is
-kind of counterproductive in a caching system.
+If you want to save some CPU cycles and can guarantee that what you're passing
+in is either "mongo-safe" and doesn't need pickling, or you know it's already
+pickled (such as while using beaker sessions), you can set an extra beaker
+config flag of skip_pickle=True.  ``.. admonition:: To make that perfectly
+clear, Beaker sessions are ALREADY PASSED IN pickled, so you want to configure
+it to skip_pickle.`` It shouldn't hurt anything to double-pickle, but you will
+certainly waste precious CPU cycles.  And wasting CPU cycles is kind of
+counterproductive in a caching system.
 
 My pylons application configuration for mongodb_beaker has the
 following session_configuration::
@@ -143,8 +147,9 @@ following session_configuration::
     ... beaker.session.url = mongodb://localhost:27017/beaker.sessions
     ... beaker.session.skip_pickle = True
 
-Depending on your individual needs, you may also wish to create a
-capped collection for your caching (e.g. memcache-like only most recently used storage)
+Depending on your individual needs, you may also wish to create a capped
+collection for your caching (e.g. memcache-like only most recently used
+storage)
 
 See the MongoDB CappedCollection_. docs for details.
 
@@ -153,20 +158,26 @@ See the MongoDB CappedCollection_. docs for details.
 Sparse Collection Support
 =========================
 
-The default behavior of mongodb_beaker is to create a single MongoDB Document for each namespace, and store each 
-cache key/value on that document.  In this case, the "_id" of the document will be the namespace, and each new cache entry
-will be attached to that document.
+The default behavior of mongodb_beaker is to create a single MongoDB Document
+for each namespace, and store each cache key/value on that document.  In this
+case, the "_id" of the document will be the namespace, and each new cache
+entry will be attached to that document.
 
-This approach works well in many cases and makes it very easy for Mongo to efficiently manage your cache.  However, in other cases
-you may wish to change behavior.  This may be for efficiency reasons, or because you're worried about documents getting too large.
+This approach works well in many cases and makes it very easy for Mongo to
+efficiently manage your cache.  However, in other cases you may wish to change
+behavior.  This may be for efficiency reasons, or because you're worried about
+documents getting too large.
 
-In this case, you can enable a "sparse collection" mode, where mongodb_beaker will create a document for EACH key in the namespace.
-When sparse collections are enabled, the "_id" of a document is a compound document containing the namespace and the key::
+In this case, you can enable a "sparse collection" mode, where mongodb_beaker
+will create a document for EACH key in the namespace.  When sparse collections
+are enabled, the "_id" of a document is a compound document containing the
+namespace and the key::
 
    { "_id" : { "namespace" : "testcache", "key" : "value" } }
 
-The cache data for that key will be stored in a document field 'data'.  You can enable sparse collections in your config with the
-'sparse_collections' variable::
+The cache data for that key will be stored in a document field 'data'.  You
+can enable sparse collections in your config with the 'sparse_collections'
+variable::
 
     >>> beaker.session.type = mongodb
     ... beaker.session.url = mongodb://localhost:27017/beaker.sessions
@@ -175,9 +186,11 @@ The cache data for that key will be stored in a document field 'data'.  You can 
 Note for Users of Previous Releases
 ====================================
 
-For bug fix and feature reasons, MongoDB Beaker 0.5+ are not compatible with caches created by previous releases.
-Because this is cache data, it shouldn't be a big deal.  We recommend dropping or flushing your entire cache collection(s)
-before upgrading to 0.5+ and be aware that it will generate new caches.
+For bug fix and feature reasons, MongoDB Beaker 0.5+ are not compatible with
+caches created by previous releases.  Because this is cache data, it shouldn't
+be a big deal.  We recommend dropping or flushing your entire cache
+collection(s) before upgrading to 0.5+ and be aware that it will generate new
+caches.
 
 
 
@@ -187,10 +200,9 @@ before upgrading to 0.5+ and be aware that it will generate new caches.
 import logging
 from beaker.container import NamespaceManager, Container
 from beaker.exceptions import InvalidCacheBackendError, MissingCacheParameter
-from beaker.synchronization import file_synchronizer
+from beaker.synchronization import null_synchronizer
 from beaker.util import verify_directory, SyncDict
 
-from StringIO import StringIO
 try:
     import cPickle as pickle
 except ImportError:
@@ -206,6 +218,12 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
+
+class InvalidURI(Exception):
+    """Raised when invalid uris for mongo connection set."""
+    pass
+
+
 class MongoDBNamespaceManager(NamespaceManager):
     clients = SyncDict()
     _pickle = True
@@ -213,7 +231,7 @@ class MongoDBNamespaceManager(NamespaceManager):
 
     # TODO _- support write concern / safe
     def __init__(self, namespace, url=None, data_dir=None,
-                 lock_dir=None, skip_pickle=False, 
+                 lock_dir=None, skip_pickle=False,
                  sparse_collection=False, **params):
         NamespaceManager.__init__(self, namespace)
 
@@ -225,7 +243,8 @@ class MongoDBNamespaceManager(NamespaceManager):
             self._pickle = False
 
         if sparse_collection:
-            log.info("Separating data to one row per key (sparse collection) for ns %s ." % self.namespace)
+            log.info(("Separating data to one row per key (sparse collection)"
+                     " for ns %s .") % self.namespace)
             self._sparse = True
 
         # Temporarily uses a local copy of the functions until pymongo upgrades to new parser code
@@ -247,7 +266,7 @@ class MongoDBNamespaceManager(NamespaceManager):
             self.lock_dir = lock_dir
         elif data_dir:
             self.lock_dir = data_dir + "/container_mongodb_lock"
-        if self.lock_dir:
+        if hasattr(self, 'lock_dir'):
             verify_directory(self.lock_dir)
 
         def _create_mongo_conn():
@@ -260,22 +279,20 @@ class MongoDBNamespaceManager(NamespaceManager):
             db = conn[database]
 
             if username:
-                log.info("Attempting to authenticate %s/%s " % (username, password))
+                log.info("Attempting to authenticate %s/%s " % (username,
+                                                                password))
                 if not db.authenticate(username, password):
                     raise InvalidCacheBackendError('Cannot authenticate to '
                                                    ' MongoDB.')
             return db[collection]
 
-        self.mongo = MongoDBNamespaceManager.clients.get(data_key,
-                    _create_mongo_conn)
+        self.mongo = MongoDBNamespaceManager.clients.get(
+            data_key,
+            _create_mongo_conn)
 
     def get_creation_lock(self, key):
-        """@TODO - stop hitting filesystem for this...
-        I think mongo can properly avoid dog piling for us.
-        """
-        return file_synchronizer(
-            identifier = "mongodb_container/funclock/%s" % self.namespace,
-            lock_dir = self.lock_dir)
+        """No locking, mongodb will handle it for us."""
+        return null_synchronizer
 
     def do_remove(self):
         """Clears the entire filesystem (drops the collection)"""
@@ -288,7 +305,6 @@ class MongoDBNamespaceManager(NamespaceManager):
 
         log.debug("[MongoDB] Remove Query: %s" % q)
         self.mongo.remove(q)
-
 
     def __getitem__(self, key):
         log.debug("[MongoDB %s] Get Key: %s" % (self.mongo,
@@ -329,7 +345,10 @@ class MongoDBNamespaceManager(NamespaceManager):
                 value = _depickle(value)
             else:
                 if value['pickled']:
-                    value = (value['stored'], value['expires'], _depickle(value['value']))
+                    value = (
+                        value['stored'],
+                        value['expires'],
+                        _depickle(value['value']))
                 else:
                     value = (value['stored'], value['expires'], value['value'])
 
@@ -338,7 +357,6 @@ class MongoDBNamespaceManager(NamespaceManager):
             return value
         else:
             return None
-
 
     def __contains__(self, key):
         def _has():
@@ -351,7 +369,6 @@ class MongoDBNamespaceManager(NamespaceManager):
 
         log.debug("[MongoDB] Has '%s'? " % key)
         ret = _has()
-
 
         return ret
 
@@ -380,11 +397,10 @@ class MongoDBNamespaceManager(NamespaceManager):
             try:
                 bson.encode(value)
             except:
-                log.warning("Value is not bson serializable, pickling inner value.")
+                log.warning(
+                    "Value is not bson serializable, pickling inner value.")
                 value['value'] = pickle.dumps(value['value'])
                 value['pickled'] = True
-
-
 
         if self._sparse:
             _id = {
@@ -395,13 +411,15 @@ class MongoDBNamespaceManager(NamespaceManager):
             doc['data'] = value
             doc['_id'] = _id
             if expiretime:
-                # TODO - What is the datatype of this? it should be instantiated as a datetime instance
+                # TODO - What is the datatype of this? it should be
+                # instantiated as a datetime instance
                 doc['valid_until'] = expiretime
         else:
             _id = self.namespace
             doc['$set'] = {'data.' + key: value}
             if expiretime:
-                # TODO - What is the datatype of this? it should be instantiated as a datetime instance
+                # TODO - What is the datatype of this? it should be
+                # instantiated as a datetime instance
                 doc['$set']['valid_until'] = expiretime
 
         log.debug("Upserting Doc '%s' to _id '%s'" % (doc, _id))
@@ -420,12 +438,19 @@ class MongoDBNamespaceManager(NamespaceManager):
 
     def keys(self):
         if self._sparse:
-            return [row['_id']['field'] for row in self.mongo.find({'_id.namespace': self.namespace}, {'_id': True})]
+            return [
+                row['_id']['field'] for row in
+                self.mongo.find(
+                    {'_id.namespace': self.namespace}, {'_id': True})
+            ]
         else:
-            return self.mongo.find_one({'_id': self.namespace}, {'data': True}).get('data', {})
+            return self.mongo.find_one(
+                {'_id': self.namespace}, {'data': True}).get('data', {})
+
 
 class MongoDBContainer(Container):
     namespace_class = MongoDBNamespaceManager
+
 
 def _partition(source, sub):
     """Our own string partitioning method.
