@@ -13,7 +13,6 @@ except ImportError:
     from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
 
 
 setup(
@@ -21,7 +20,7 @@ setup(
     version='0.5.3-mmn1',
     description=('Beaker backend to write sessions and caches to a '
                    'MongoDB schemaless database.'),
-    long_description='\n' + README,
+    long_description='\n' + "MongoDB Beaker backend",
     author='Brendan W. McAdams',
     author_email='bwmcadams@gmail.com',
     keywords='mongo mongodb beaker cache session',
